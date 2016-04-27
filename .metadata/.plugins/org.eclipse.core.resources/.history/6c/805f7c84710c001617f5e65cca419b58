@@ -1,0 +1,81 @@
+package PedroTool;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+public class Main {
+	public static ArrayList<String> NameTests = new ArrayList<String>();
+	public static ArrayList<String> ListRerun= new ArrayList<String>();
+
+	public static Elements parser(String url) {
+
+		
+		StringBuilder a = new StringBuilder();
+		try {
+			URL yahoo = new URL(url);
+			URLConnection yc = yahoo.openConnection();
+			BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream(), "UTF-8"));
+			String inputLine;
+			while ((inputLine = in.readLine()) != null)
+				a.append(inputLine);
+			in.close();
+
+		} catch (Exception e) {
+			System.out.println("Error");
+			e.printStackTrace();
+		}
+
+		Document doc = Jsoup.parse(a.toString());
+		System.out.println(doc.select("title").html());
+		Elements elements = doc.select("#reportsTable").select("tr");
+
+		return elements;
+	}
+
+	public static void PickUpElements(Elements elements) {
+
+		for (Element e : elements) {
+
+			String Result = e.select("div").get(3).html().toString();
+
+			if (Result.equals("Failed") || Result.equals("Missing results")) {
+
+			NameTests.add(e.select("div").get(0).select("a").select("nobr").html().toString());
+				ListRerun.add(e.select("div").get(0).select("a").select("nobr").html().toString());
+				System.out.println(e.select("div").get(0).select("a").select("nobr").html().toString());
+			}
+		}
+
+	}
+/*
+	public static String ConElemString() {
+
+		String Result2 = "";
+
+		for (String e : NameTests) {
+
+			Result2 = Result2 + e + "/n";
+
+		}
+		return Result2;
+	}
+
+	public ArrayList<String> myNumbers() {
+		ArrayList<String> numbers = new ArrayList<String>();
+		numbers = NameTests;
+		return (numbers);
+	} 
+	*/
+	public static void main(String [ ] args)
+	{
+		PickUpElements(parser("https://lte-dailyatest.rnd.ki.sw.ericsson.se/log/personal/bbijenkins/jenkins/20160427_020826_3Jy6/summaryReport.html"));
+	}
+}
